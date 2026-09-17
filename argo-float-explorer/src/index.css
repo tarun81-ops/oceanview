@@ -1,3 +1,13 @@
+/*
+ * Fonts are bundled from @fontsource instead of fetched from Google Fonts, so the
+ * app has no external network dependency and renders identically offline.
+ */
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
 :root {
   --bg: #050d16;
   --surface: #0b1a26;
@@ -8,8 +18,8 @@
   --cyan: #3fc8d4;
   --teal: #1c8f9c;
   --coral: #e8825a;
-  --sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -59,6 +69,9 @@ select:focus-visible, .btn:focus-visible, h2:focus-visible {
 .viewport canvas:active { cursor: grabbing; }
 .viewport--pointer canvas, .viewport--pointer canvas:active { cursor: pointer; }
 
+/* Fallback content of <canvas>; visible only without canvas support. */
+.canvas-fallback { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+
 .state {
   position: absolute; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center;
@@ -90,6 +103,8 @@ select:focus-visible, .btn:focus-visible, h2:focus-visible {
   position: absolute; right: 22px; bottom: 16px; width: 168px;
   background: var(--surface); border: 1px solid var(--line); padding: 11px 13px;
 }
+/* The panel would otherwise cover the colour key exactly when it is needed. */
+.viewport--panel-open .legend { right: 362px; }
 .legend__title { font-size: 11px; font-weight: 600; margin-bottom: 8px; }
 .legend__ramp { height: 7px; }
 .legend__scale {
@@ -134,7 +149,8 @@ select:focus-visible, .btn:focus-visible, h2:focus-visible {
   .toolbar__controls { width: 100%; justify-content: space-between; }
   .hint { display: none; }
   /* moved above the bottom sheet so the sheet never covers the colour key */
-  .legend { top: 12px; right: 12px; bottom: auto; width: 138px; }
+  .legend,
+  .viewport--panel-open .legend { top: 12px; right: 12px; bottom: auto; width: 138px; }
   .panel {
     top: auto; bottom: 0; width: 100%; height: 64%;
     border-left: none; border-top: 1px solid var(--line);

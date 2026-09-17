@@ -17,13 +17,18 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # The Vite app lives in its own folder; everything runs from there.
+        working-directory: argo-float-explorer
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: argo-float-explorer/.nvmrc
           cache: npm
+          cache-dependency-path: argo-float-explorer/package-lock.json
 
       # Reproducible install from the committed lockfile.
       - run: npm ci
@@ -38,7 +43,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: argo-float-explorer/dist
 
   deploy:
     needs: build
