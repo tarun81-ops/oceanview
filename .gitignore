@@ -11,5 +11,5 @@ dist-ssr/
 
 # TypeScript build-mode bookkeeping
 *.tsbuildinfo
-data/raw/
+raw/
 *.nc
