@@ -1,0 +1,11 @@
+{
+  "id": "WMO3901234",
+  "lat": -12.45,
+  "lon": 72.10,
+  "month": 7,
+  "surfaceTemp": 28.4,
+  "series": [
+    { "depth": 0, "temp": 28.4, "sal": 35.1 },
+    { "depth": 10, "temp": 28.1, "sal": 35.2 }
+  ]
+}
