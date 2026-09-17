@@ -124,7 +124,7 @@ export function FloatMarkers({ profiles, selectedId, hoveredId, onSelect, onHove
     <group>
       {profiles.map((p) => (
         <FloatMarker
-          key={p.id + p.month}
+          key={p.id}
           profile={p}
           selected={p.id === selectedId}
           hovered={p.id === hoveredId}

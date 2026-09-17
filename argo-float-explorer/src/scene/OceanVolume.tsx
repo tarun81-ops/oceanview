@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Html, Line } from '@react-three/drei';
 import { BoxGeometry, EdgesGeometry } from 'three';
 import { depthToY, VOLUME } from '../lib/projection';
@@ -12,10 +12,16 @@ const RULER_Z = VOLUME.depth / 2;
  * edge of the volume so the labels stay aligned with the 3D scene as it orbits.
  */
 export function OceanVolume() {
-  const edges = useMemo(
-    () => new EdgesGeometry(new BoxGeometry(VOLUME.width, VOLUME.height, VOLUME.depth)),
-    [],
-  );
+  const edges = useMemo(() => {
+    const box = new BoxGeometry(VOLUME.width, VOLUME.height, VOLUME.depth);
+    const geometry = new EdgesGeometry(box);
+    // EdgesGeometry copies what it needs; the source box would otherwise leak a
+    // GPU buffer for the lifetime of the page.
+    box.dispose();
+    return geometry;
+  }, []);
+
+  useEffect(() => () => edges.dispose(), [edges]);
 
   return (
     <group>

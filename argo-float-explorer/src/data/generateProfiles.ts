@@ -60,7 +60,10 @@ export function generateProfiles(count = 60): Profile[] {
     }));
 
     profiles.push({
-      id: `WMO${2900000 + Math.floor(rnd() * 99999)}`,
+      // Sequential stride + small jitter: unique by construction. A purely random
+      // id collides (Birthday problem), and duplicate ids broke selection, panel
+      // lookups and React keys.
+      id: `WMO${2900000 + i * 173 + Math.floor(rnd() * 100)}`,
       lat: Number(lat.toFixed(2)),
       lon: Number(lon.toFixed(2)),
       month,

@@ -10,6 +10,14 @@ import { ProfilePanel } from './ui/ProfilePanel';
 import { StatusScreen } from './ui/StatusScreen';
 
 type Status = 'loading' | 'ready' | 'error';
+type SceneStatus = 'pending' | 'ready' | 'failed';
+
+/**
+ * How long to wait for the first rendered frame before declaring the 3D view
+ * broken. react-three-fiber renders `null` when something inside the canvas
+ * throws, so without this watchdog that failure would be an empty viewport.
+ */
+const SCENE_TIMEOUT_MS = 6000;
 
 export default function App() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -17,6 +25,8 @@ export default function App() {
   const [month, setMonth] = useState<number | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [sceneStatus, setSceneStatus] = useState<SceneStatus>('pending');
+  const [sceneAttempt, setSceneAttempt] = useState(0);
   const controls = useRef<OrbitControlsImpl>(null);
   const webgl = useMemo(isWebGLAvailable, []);
 
@@ -27,7 +37,10 @@ export default function App() {
         setProfiles(data);
         setStatus('ready');
       })
-      .catch(() => setStatus('error'));
+      .catch((error: unknown) => {
+        console.error('Could not load profiles:', error);
+        setStatus('error');
+      });
   }, []);
 
   useEffect(fetchProfiles, [fetchProfiles]);
@@ -47,8 +60,10 @@ export default function App() {
   const step = useCallback(
     (delta: number) => {
       if (!visible.length) return;
-      const base = selectedIndex === -1 ? 0 : selectedIndex + delta;
-      const next = ((base % visible.length) + visible.length) % visible.length;
+      // Stepping from "nothing selected" enters the list at the front when going
+      // forward and at the back when going backward, then wraps in both directions.
+      const from = selectedIndex === -1 ? (delta > 0 ? -1 : 0) : selectedIndex;
+      const next = (((from + delta) % visible.length) + visible.length) % visible.length;
       setSelectedId(visible[next].id);
     },
     [visible, selectedIndex],
@@ -67,6 +82,22 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [step]);
 
+  const sceneVisible = webgl && status === 'ready' && sceneStatus !== 'failed';
+
+  // Watchdog: a canvas that never draws a frame is a failure, not a blank screen.
+  useEffect(() => {
+    if (!sceneVisible) return;
+    const timer = window.setTimeout(() => {
+      setSceneStatus((current) => (current === 'ready' ? current : 'failed'));
+    }, SCENE_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [sceneVisible, sceneAttempt]);
+
+  const retryScene = useCallback(() => {
+    setSceneStatus('pending');
+    setSceneAttempt((attempt) => attempt + 1);
+  }, []);
+
   const hovering = hoveredId !== null;
 
   return (
@@ -79,7 +110,11 @@ export default function App() {
         onResetView={() => controls.current?.reset()}
       />
 
-      <main className={`viewport${hovering ? ' viewport--pointer' : ''}`}>
+      <main
+        className={`viewport${hovering ? ' viewport--pointer' : ''}${
+          selected ? ' viewport--panel-open' : ''
+        }`}
+      >
         {!webgl ? (
           <StatusScreen
             title="3D view unavailable"
@@ -93,8 +128,15 @@ export default function App() {
             detail="The profile source did not respond."
             onRetry={fetchProfiles}
           />
+        ) : sceneStatus === 'failed' ? (
+          <StatusScreen
+            title="The 3D view stopped responding"
+            detail="The WebGL scene did not draw a frame. This is usually a lost GPU context or a disabled graphics driver."
+            onRetry={retryScene}
+          />
         ) : (
           <Scene
+            key={sceneAttempt}
             ref={controls}
             profiles={visible}
             selectedId={selectedId}
@@ -102,13 +144,15 @@ export default function App() {
             onSelect={(p) => setSelectedId(p.id)}
             onHover={(p) => setHoveredId(p?.id ?? null)}
             onClearSelection={() => setSelectedId(null)}
+            onReady={() => setSceneStatus('ready')}
+            onContextLost={retryScene}
           />
         )}
 
         <p className="hint">
           Drag to rotate · right-drag to pan · scroll to zoom · click a float · arrow keys step through floats
         </p>
-        {webgl && status === 'ready' && <Legend />}
+        {sceneVisible && sceneStatus === 'ready' && <Legend />}
 
         <ProfilePanel
           profile={selected}
