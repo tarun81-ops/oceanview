@@ -17,10 +17,11 @@ export function Toolbar({ month, onMonthChange, visibleCount, totalCount, onRese
       </div>
 
       <div className="toolbar__controls">
-        <label htmlFor="month">Month</label>
+        <label htmlFor="month-filter">Month</label>
         <select
-          id="month"
+          id="month-filter"
           value={month}
+          aria-label="Filter floats by observation month"
           onChange={(e) => onMonthChange(e.target.value === 'all' ? 'all' : Number(e.target.value))}
         >
           <option value="all">All 2019</option>
@@ -31,11 +32,16 @@ export function Toolbar({ month, onMonthChange, visibleCount, totalCount, onRese
           ))}
         </select>
 
-        <span className="count">
-          {visibleCount}/{totalCount} profiles
+        <span className="count" role="status" aria-live="polite">
+          {visibleCount} of {totalCount} profiles
         </span>
 
-        <button type="button" className="btn" onClick={onResetView}>
+        <button
+          type="button"
+          className="btn"
+          onClick={onResetView}
+          aria-label="Reset the 3D camera to its default view"
+        >
           Reset view
         </button>
       </div>

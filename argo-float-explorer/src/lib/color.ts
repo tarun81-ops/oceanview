@@ -19,3 +19,16 @@ export function temperatureColor(temp: number): Color {
 export function temperatureCss(temp: number): string {
   return `#${temperatureColor(temp).getHexString()}`;
 }
+
+/**
+ * CSS gradient sampled from temperatureColor itself, so the legend can never
+ * drift out of sync with the colours used on the float markers.
+ */
+export function temperatureRampCss(stops = 9): string {
+  const parts: string[] = [];
+  for (let i = 0; i < stops; i += 1) {
+    const t = TEMP_MIN + ((TEMP_MAX - TEMP_MIN) * i) / (stops - 1);
+    parts.push(`${temperatureCss(t)} ${((i / (stops - 1)) * 100).toFixed(0)}%`);
+  }
+  return `linear-gradient(90deg, ${parts.join(', ')})`;
+}
