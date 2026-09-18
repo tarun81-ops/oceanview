@@ -1,0 +1,11 @@
+# Node
+node_modules/
+dist/
+
+# Raw NetCDF inputs: local only, never modified/uploaded/committed
+data/raw/
+*.nc
+
+# Python data pipeline
+.venv/
+__pycache__/

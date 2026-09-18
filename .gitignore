@@ -11,4 +11,9 @@ dist-ssr/
 
 # TypeScript build-mode bookkeeping
 *.tsbuildinfo
+
+# Raw Argo NetCDF inputs (local only) + Python data pipeline
+data/raw/
 *.nc
+.venv/
+__pycache__/
