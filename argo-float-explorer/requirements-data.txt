@@ -1,0 +1,10 @@
+# Python data pipeline: real Argo NetCDF -> public/data/profiles.json
+#
+#   python -m venv .venv
+#   .venv\Scripts\activate
+#   pip install -r requirements-data.txt
+#   python scripts\convert_netcdf.py
+numpy>=1.26
+xarray>=2024.1.0
+netCDF4>=1.6.5
+cftime>=1.6

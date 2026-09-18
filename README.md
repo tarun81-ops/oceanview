@@ -23,5 +23,12 @@ npm run build
 npm run preview    # http://localhost:4173
 ```
 
+The app loads real Argo profiles by default from
+`argo-float-explorer/public/data/profiles.json`. Regenerate that file from raw
+NetCDF inputs in `argo-float-explorer/data/raw/` (git-ignored) with
+`python scripts/convert_netcdf.py` — see the "Real Argo data" section of
+[`argo-float-explorer/README.md`](./argo-float-explorer/README.md) for Windows
+and Linux/macOS instructions.
+
 Full documentation, project layout and deployment notes:
 [`argo-float-explorer/README.md`](./argo-float-explorer/README.md).
